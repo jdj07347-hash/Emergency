@@ -1,0 +1,84 @@
+@import "tailwindcss";
+
+@theme inline {
+  --font-sans: var(--font-geist-sans);
+  --font-mono: var(--font-geist-mono);
+
+  /* Command-center surfaces */
+  --color-ops-950: #070c18;
+  --color-ops-900: #0b1222;
+  --color-ops-850: #0f1830;
+  --color-ops-800: #142039;
+  --color-ops-700: #1e2c4a;
+  --color-ops-600: #2a3b5f;
+
+  /* Brand accent (used sparingly — not for emergencies) */
+  --color-brand-500: #3b82f6;
+  --color-brand-600: #2563eb;
+
+  --animate-pulse-ring: pulse-ring 2s cubic-bezier(0.4, 0, 0.6, 1) infinite;
+  --animate-fade-up: fade-up 0.35s ease-out both;
+}
+
+@keyframes pulse-ring {
+  0% { box-shadow: 0 0 0 0 rgb(239 68 68 / 0.45); }
+  70% { box-shadow: 0 0 0 18px rgb(239 68 68 / 0); }
+  100% { box-shadow: 0 0 0 0 rgb(239 68 68 / 0); }
+}
+
+@keyframes fade-up {
+  from { opacity: 0; transform: translateY(6px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+
+html {
+  -webkit-tap-highlight-color: transparent;
+}
+
+body {
+  background: #f6f7fb;
+  color: #0f172a;
+}
+
+/* Leaflet markers built with divIcon */
+.sr-marker {
+  background: transparent;
+  border: none;
+}
+.sr-marker .pin {
+  display: grid;
+  place-items: center;
+  width: 34px;
+  height: 34px;
+  border-radius: 9999px;
+  font-size: 16px;
+  border: 2px solid white;
+  box-shadow: 0 4px 12px rgb(15 23 42 / 0.35);
+}
+.sr-marker .pin.incident {
+  width: 40px;
+  height: 40px;
+  font-size: 18px;
+}
+.sr-marker .pin.highlight {
+  animation: pulse-ring 1.8s infinite;
+}
+.sr-marker .pin.dim {
+  opacity: 0.55;
+}
+
+/* Dark tiles for the command center */
+.sr-map-dark .leaflet-tile-pane {
+  filter: invert(1) hue-rotate(200deg) brightness(0.95) contrast(0.9) saturate(0.6);
+}
+.sr-map-dark .leaflet-container {
+  background: #0b1222;
+}
+.leaflet-container {
+  font-family: var(--font-geist-sans), system-ui, sans-serif;
+}
+.leaflet-popup-content {
+  margin: 10px 12px;
+  font-size: 13px;
+  line-height: 1.4;
+}
