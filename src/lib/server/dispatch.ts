@@ -13,6 +13,7 @@ import { assignmentTravel, formatDistance, formatEta, haversineKm } from "../geo
 import { must, supabaseAdmin } from "../supabase/server";
 import type { Incident, Responder, ResponderAssignment } from "../types";
 import { logEvent } from "./events";
+import { bringWithinRing } from "./fleet";
 import { roadRoute, travelTimesTo } from "./routing";
 
 type IncidentPoint = Pick<Incident, "id" | "latitude" | "longitude">;
@@ -46,7 +47,8 @@ export async function dispatchResponder(
     .map((c, i) => ({ ...c, travel: times[i] }))
     .sort((a, b) => a.travel.durationSec - b.travel.durationSec);
 
-  for (const { responder, distance, travel } of candidates) {
+  for (const candidate of candidates) {
+    let { responder, distance, travel } = candidate;
     // Conditional claim: only succeeds if the unit is still AVAILABLE (guards concurrent incidents).
     const claimed = await db
       .from("responders")
@@ -55,6 +57,14 @@ export async function dispatchResponder(
       .eq("status", "AVAILABLE")
       .select("id");
     if (claimed.error || !claimed.data?.length) continue;
+
+    // Demo: the dispatched unit always starts 10–20 km from the emergency.
+    const placed = await bringWithinRing("responders", responder, incident);
+    if (placed !== responder) {
+      responder = placed;
+      distance = haversineKm(responder, incident);
+      travel = (await travelTimesTo([responder], incident))[0];
+    }
 
     const route = await roadRoute(responder, incident);
     const best = route?.travel ?? (travel.source === "ROAD" ? travel : null);

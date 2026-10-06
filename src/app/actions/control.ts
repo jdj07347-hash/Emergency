@@ -68,7 +68,7 @@ export async function resolveIncidentManually(incidentId: string) {
   });
 }
 
-/** Move every demo unit and hospital to points 5–10 km around a new center point. */
+/** Move every demo unit and hospital to points 10–20 km around a new center point. */
 export async function recenterDemoUnits(latitude: number, longitude: number) {
   return run(async () => {
     if (!Number.isFinite(latitude) || !Number.isFinite(longitude) || Math.abs(latitude) > 85 || Math.abs(longitude) > 180) {

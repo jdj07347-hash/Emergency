@@ -46,7 +46,7 @@ Sign-ins are remembered per browser for several identities at once, so a present
 
 ## Running the demo scenario
 
-1. Nothing to set up: every new report marks the reporter’s exact GPS position as the emergency location and places the idle demo units and hospitals on roads 5–10 km around it. **Demo tools → Re-center** does the same on demand.
+1. Nothing to set up: every new report marks the reporter’s exact GPS position as the emergency location and places the idle demo units and hospitals on roads 10–20 km around it. **Demo tools → Re-center** does the same on demand.
 2. On a phone, open `/` → *Report emergency* → enable location → record:
    *"There has been a major accident near the bridge. Multiple vehicles are involved. Many people are injured and some may be trapped. Around 20 people are affected."* → victims **20** → add a photo → **Send**.
 3. Gemini returns ROAD_ACCIDENT / CRITICAL; the backend computes priority (~95), dispatches nearest available Fire (Fire 3 is seeded **BUSY**, so it is skipped), Police and Ambulance, and notifies the nearest hospital.

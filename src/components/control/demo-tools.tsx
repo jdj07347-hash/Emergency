@@ -42,7 +42,7 @@ export function DemoTools({ selected }: { selected: Incident | null }) {
       {open && (
         <div className="absolute right-0 z-[2000] mt-2 w-80 space-y-1 rounded-xl border border-ops-600 bg-ops-850 p-2 shadow-2xl shadow-black/50">
           <p className="px-3 pt-1 pb-2 text-[11px] text-slate-500">
-            Idle units are placed 5–10 km around each new emergency automatically. You can also re-center them manually.
+            Idle units are placed 10–20 km around each new emergency automatically. You can also re-center them manually.
           </p>
           <button className={item} disabled={pending} onClick={recenterHere}>
             📍 Re-center units on my location

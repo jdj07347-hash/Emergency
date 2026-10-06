@@ -75,7 +75,7 @@ export async function createIncidentFromReport(report: ValidatedReport): Promise
     await logEvent(incident.id, "MEDIA_RECEIVED", `Evidence received: ${kinds}`, { count: mediaRows.length });
   }
 
-  // Demo: place idle units 5–10 km around the reporter while the AI runs.
+  // Demo: place idle units 10–20 km around the reporter while the AI runs.
   const fleetReady = ensureFleetNear(incident).catch((err) => {
     console.error(`[pipeline] fleet positioning failed for ${incident.code}:`, (err as Error).message);
   });

@@ -9,12 +9,12 @@ import { snapToRoad } from "./routing";
 /*
  * DEMO MODE fleet positioning.
  * The demo has a small fictional fleet. Every new emergency pulls the idle
- * units and hospitals to random points 5–10 km around the reporter's exact
+ * units and hospitals to random points 10–20 km around the reporter's exact
  * location, so dispatch, routes and ETAs are meaningful wherever the demo is used.
  */
 
-export const MIN_RING_KM = 5;
-export const MAX_RING_KM = 10;
+export const MIN_RING_KM = 10;
+export const MAX_RING_KM = 20;
 const GOLDEN_ANGLE = 137.508;
 
 type Point = { latitude: number; longitude: number };
@@ -26,10 +26,10 @@ function pointAt(center: Point, km: number, bearingDeg: number): Point {
 }
 
 /**
- * A spot 5–10 km from `center`, on a road where possible (so it never lands in
+ * A spot 10–20 km from `center`, on a road where possible (so it never lands in
  * the sea or a field). Tries a few directions before giving up on road snapping.
  */
-async function ringPosition(center: Point, bearingDeg: number): Promise<Point> {
+export async function ringPosition(center: Point, bearingDeg: number): Promise<Point> {
   let first: Point | null = null;
   for (let attempt = 0; attempt < 4; attempt++) {
     const km = MIN_RING_KM + Math.random() * (MAX_RING_KM - MIN_RING_KM);
@@ -45,7 +45,7 @@ async function ringPosition(center: Point, bearingDeg: number): Promise<Point> {
   return first!;
 }
 
-/** Spread the given units and hospitals in all directions, 5–10 km around `center`. */
+/** Spread the given units and hospitals in all directions, 10–20 km around `center`. */
 export async function positionFleet(center: Point, responders: Responder[], hospitals: Hospital[]) {
   const db = supabaseAdmin();
   const now = new Date().toISOString();
@@ -71,8 +71,8 @@ export async function positionFleet(center: Point, responders: Responder[], hosp
 }
 
 /**
- * Position idle demo units 5–10 km around an incident. With `onlyIfUncovered`,
- * nothing moves when every service already has an available unit within 10 km.
+ * Position idle demo units 10–20 km around an incident. With `onlyIfUncovered`,
+ * nothing moves when every service already has an available unit within 20 km.
  * Units and hospitals busy with another open incident are never moved.
  */
 export async function ensureFleetNear(incident: Point & { id: string }, { onlyIfUncovered = false } = {}): Promise<boolean> {
@@ -105,4 +105,23 @@ export async function ensureFleetNear(incident: Point & { id: string }, { onlyIf
     { units: idleUnits.length, hospitals: idleHospitals.length },
   );
   return true;
+}
+
+/**
+ * DEMO MODE guarantee: a unit or hospital chosen for an incident is always shown
+ * 10–20 km away. If it is farther (left behind by an earlier incident, or the
+ * positioning step failed), move it to a random point in that ring first.
+ */
+export async function bringWithinRing<T extends Point & { id: string }>(
+  table: "responders" | "hospitals",
+  row: T,
+  center: Point,
+): Promise<T> {
+  if (haversineKm(row, center) <= MAX_RING_KM + 0.5) return row;
+  const p = await ringPosition(center, Math.random() * 360);
+  await supabaseAdmin()
+    .from(table)
+    .update({ latitude: p.latitude, longitude: p.longitude, updated_at: new Date().toISOString() })
+    .eq("id", row.id);
+  return { ...row, latitude: p.latitude, longitude: p.longitude };
 }

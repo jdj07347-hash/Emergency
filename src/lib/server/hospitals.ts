@@ -3,6 +3,7 @@ import { formatDistance, haversineKm } from "../geo";
 import { must, supabaseAdmin } from "../supabase/server";
 import type { Hospital, HospitalAllocation, HospitalRequest, Incident } from "../types";
 import { logEvent } from "./events";
+import { bringWithinRing } from "./fleet";
 
 export class HospitalFlowError extends Error {}
 
@@ -45,10 +46,16 @@ export async function contactNextHospital(incidentId: string) {
 
   const contacted = new Set(requests.map((r) => r.hospital_id));
   const hospitals = must(await db.from("hospitals").select("*"), "load hospitals") as Hospital[];
-  const next = hospitals
+  const nearest = hospitals
     .filter((h) => !contacted.has(h.id) && h.is_available && h.emergency_capacity > 0)
     .map((h) => ({ hospital: h, distance: haversineKm(h, incident) }))
     .sort((a, b) => a.distance - b.distance)[0];
+  // Demo: the contacted hospital is always 10–20 km from the emergency.
+  let next = nearest;
+  if (nearest) {
+    const hospital = await bringWithinRing("hospitals", nearest.hospital, incident);
+    next = { hospital, distance: haversineKm(hospital, incident) };
+  }
 
   if (!next) {
     await db.from("incidents").update({ hospital_status: "UNCOVERED", updated_at: now }).eq("id", incidentId);

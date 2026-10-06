@@ -42,7 +42,8 @@ Examples:
 - "Some men are following me" → police only; medical and fire false; estimated victims 0 unless someone is hurt.
 - "People stuck in a collapsed house" → fire + medical + police.
 - "My father collapsed and isn't breathing" → medical only.
-- "Kitchen fire, everyone got out" → fire only.
+- "Fire in an apartment / house / building" → fire + medical + police (evacuation, smoke inhalation, scene control).
+- "Small kitchen fire, already out, nobody hurt" → fire only, severity LOW.
 - estimated_victims counts people injured or physically harmed, not people merely at risk.
 - transcript: transcribe the voice recording verbatim in its original language (empty string if no audio).
 - Do not invent facts. If the report is unclear, use OTHER with lower confidence.

@@ -40,8 +40,10 @@ const RULES: ((s: ServiceSignals) => ResponderType[])[] = [
   (s) => (s.medicalRequired ? ["AMBULANCE"] : []),
   // Safety net: casualties at a physical incident always get an ambulance, even if the AI missed it.
   (s) => (s.victims > 0 && CASUALTY_CATEGORIES.has(s.category) ? ["AMBULANCE"] : []),
-  // Large or serious fires need scene control.
-  (s) => (s.category === "FIRE" && (s.severity === "HIGH" || s.severity === "CRITICAL" || s.victims >= 5) ? ["POLICE"] : []),
+  // Any fire beyond a minor, contained one (e.g. a house or apartment fire) gets the full response:
+  // police for evacuation and scene control, an ambulance on standby for burns and smoke inhalation.
+  (s) =>
+    s.category === "FIRE" && (s.severity !== "LOW" || s.victims > 0 || s.trappedPossible) ? ["POLICE", "AMBULANCE"] : [],
 ];
 
 export function requiredServices(signals: ServiceSignals): ResponderType[] {
